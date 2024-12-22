@@ -98,9 +98,15 @@ while (step < opts.maxit) && ~H.IsEmpty()
     if opts.verbose
         disp(['Step ', num2str(step), ': global lb = ', num2str(L)])
     end
-    if U - L < opts.eps*(1 + abs(L) + abs(U))
+
+    if abs(L) < opts.eps
         break
     end
+
+%     if U - L < opts.eps*(1 + abs(L) + abs(U))
+%         break
+%     end
+%   alternative terminate condition
 
     if opts.time
         time1 = toc(time0);
@@ -142,6 +148,10 @@ while (step < opts.maxit) && ~H.IsEmpty()
     
     step = step + 1;
 end
+
+if H.IsEmpty()
+    out.lb_vec = [out.lb_vec U];
+end
 t = L;
 out.iter = step;
 out.bnb = H;
@@ -161,6 +171,7 @@ V = node.x;
 V(:, i) = w;
 lb = get_lower_bound(x, p, n, d, V, opts);
 center = mean(V, 2);
+center = center / norm(center, 2);
 ub = min(replace(p, x, w), replace(p, x, center));
 node_new = Node([], [], lb, ub, V);
 end

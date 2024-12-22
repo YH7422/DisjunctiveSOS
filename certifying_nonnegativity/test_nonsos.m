@@ -21,14 +21,20 @@ test_index = (1:length(n_vec));
 
 opts = struct();
 opts.init = 0;
-opts.method = 1;
+opts.method = 0;
 opts.verbose = 0;
-opts.maxit = 200;
+opts.eps = 1e-6;
+opts.maxit = 300;
 
 for i = test_index
     name = name_vec(i);
     n = n_vec(i);
     d = d_vec(i);
     p = p_vec(i);
+    t_start = tic;
     [t, out] = DiSOS_BnB_SD(x(1:n), p, n, d, opts);
+    t_end = toc(t_start);
+    disp(['Test ', num2str(i), ': time = ', num2str(t_end), ' s, iter = ', num2str(out.iter)])
+    save([char(name), '_bnb_sd_init', num2str(opts.init)], 'out');
+    % save the sequence of lower and upper bounds
 end

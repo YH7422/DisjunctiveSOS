@@ -116,6 +116,10 @@ while (step < opts.max_node) && ~H.IsEmpty()
 
     step = step + 1;
 end
+
+if H.IsEmpty()
+    out.lb_vec = [out.lb_vec U];
+end
 t = L;
 out.iter = step;
 out.bnb = H;

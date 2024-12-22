@@ -1,9 +1,9 @@
 % A branch-and-bound method aimimg to estimate 
 % min x^TQx s.t. x >= 0, 1^Tx = 1, or equivalently
-% max t s.t. Q - tI \in C_n
+% max t s.t. Q - tJ \in C_n
 
 function [t, out] = DiSOS_copositive_BnB(Q, opts)
-if ~isfield(opts, 'max_node'); opts.max_node = 32; end
+if ~isfield(opts, 'max_node'); opts.max_node = 100; end
 if ~isfield(opts, 'maxit'); opts.maxit = 5; end
 if ~isfield(opts, 'eps'); opts.eps = 1e-6; end
 if ~isfield(opts, 'c'); opts.c = []; end
@@ -21,8 +21,8 @@ if ~isfield(opts, 'seed'); opts.seed = 0; end
 if ~isfield(opts, 'name'); opts.name = ""; end
 
 % fix the seed to reproduce the result
-% ss = RandStream('mt19937ar', 'Seed', opts.seed); 
-% RandStream.setGlobalStream(ss);
+ss = RandStream('mt19937ar', 'Seed', opts.seed); 
+RandStream.setGlobalStream(ss);
 
 % CVX settings
 cvx_solver MOSEK
@@ -116,6 +116,10 @@ while (step < opts.max_node) && ~H.IsEmpty()
     end
     
     step = step + 1;
+end
+
+if H.IsEmpty()
+    out.lb_vec = [out.lb_vec U];
 end
 t = L;
 out.iter = step;
