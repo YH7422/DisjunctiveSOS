@@ -58,11 +58,9 @@ For graph generation (optional, as graph files are already included):
 - Numpy: 1.25.1
 - Networkx: 3.1
 
-### Usage
+## Usage
 
 This section explains how to use the provided scripts to test the algorithms and reproduce the corresponding plots from the paper. You are free to adjust the hyperparameters directly in the testing scripts to explore different configurations.
-
-------
 
 #### Certifying Nonnegativity of Polynomials
 
