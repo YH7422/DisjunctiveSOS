@@ -103,9 +103,6 @@ This section explains how to use the provided scripts to test the algorithms and
 
 If you use this code in your research, please cite:
 
-```bibtex
-[Citation information to be added]
-```
 
 ## License
 
