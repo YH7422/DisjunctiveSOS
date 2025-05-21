@@ -6,7 +6,6 @@ opts.method = 0;
 opts.verbose = 0;
 opts.eps = 1e-6;
 opts.maxit = 300;
-opts.dq = 2;
 
 for m = 1:6
     d = 2*(2*m+1);
