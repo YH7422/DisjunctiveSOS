@@ -1,3 +1,4 @@
+clear all;
 m = 4;
 Q_array = cell(m, 1);
 
@@ -36,7 +37,7 @@ Q_array{2} = [1 0 0 0 0 0 1 1 1 1 1 1;
 opts = struct();
 opts.seed = 0;
 opts.verbose = 0;
-opts.max_node = 1000;
+opts.max_node = 500;
 
 for i = 1:4
     Q = Q_array{i};

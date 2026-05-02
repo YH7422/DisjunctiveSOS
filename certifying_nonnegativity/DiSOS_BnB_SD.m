@@ -4,8 +4,9 @@
 % p(Vx) has nonnegative coefficients on each simplicial cone. 
 
 function [t, out] = DiSOS_BnB_SD(x, p, n, d, opts)
-if ~isfield(opts, 'maxit'); opts.maxit = 100; end
-if ~isfield(opts, 'eps'); opts.eps = 1e-6; end
+if ~isfield(opts, 'max_node'); opts.max_node = 100; end
+if ~isfield(opts, 'maxit'); opts.maxit = 1; end
+if ~isfield(opts, 'eps'); opts.eps = 1e-4; end
 % The degree of cuts
 if ~isfield(opts, 'init'); opts.init = 0; end
 % init = 0, n+1 initial nodes generated from regular simplex
@@ -30,6 +31,11 @@ if opts.time
     time0 = tic;
     out.tvec = [];
 end
+
+if opts.maxit > 0
+    gp = jacobian(p, x)';
+end
+
 if opts.init == 0
     V = [sqrt(1+1/n)*eye(n) - n^(-3/2)*(sqrt(n+1)-1)*ones(n), -ones(n, 1)/sqrt(n)];
     L = -inf;
@@ -40,13 +46,14 @@ if opts.init == 0
     U = min(ub0);
     
     % initial nodes
-    H = MinHeap_BnB(opts.maxit*2);
+    H = MinHeap_BnB(opts.max_node*2);
     for i = 1:n+1
         Vi = V;
         Vi(:, i) = [];
         lb = get_lower_bound(x, p, n, d, Vi, opts);
         L = max(L, lb);
         center = mean(Vi, 2);
+        center = center / norm(center, 2);
         ubi = ub0;
         ubi(i) = [];
         ub = min(min(ubi), replace(p, x, center));
@@ -66,7 +73,7 @@ else
     U = ub0;
     
     % initial nodes
-    H = MinHeap_BnB(opts.maxit*2);
+    H = MinHeap_BnB(opts.max_node*2);
     m = 2^(n-1);
     e = [2*(dec2bin(m-1:-1:0) - '0') - 1, ones(m,1)]; % half of binary vectors
     for i = 1:m
@@ -74,6 +81,7 @@ else
         lb = get_lower_bound(x, p, n, d, V, opts);
         L = max(L, lb);
         center = mean(V, 2);
+        center = center / norm(center, 2);
         ub = min(ub0, replace(p, x, center));
         U = min(U, ub);
         node = Node([], [], lb, ub, V);
@@ -91,7 +99,7 @@ out.lb_vec = [];
 out.ub_vec = [U];
 step = 1;
 
-while (step < opts.maxit) && ~H.IsEmpty()
+while (step < opts.max_node) && ~H.IsEmpty()
     node = H.ExtractMin();
     L = node.lb;
     out.lb_vec = [out.lb_vec L];
@@ -99,13 +107,13 @@ while (step < opts.maxit) && ~H.IsEmpty()
         disp(['Step ', num2str(step), ': global lb = ', num2str(L)])
     end
 
-    if abs(L) < opts.eps
-        break
-    end
-
-%     if U - L < opts.eps*(1 + abs(L) + abs(U))
+%     if abs(L) < opts.eps
 %         break
 %     end
+
+    if U - L < opts.eps*(1 + abs(L) + abs(U))
+        break
+    end
 %   alternative terminate condition
 
     if opts.time
@@ -114,8 +122,8 @@ while (step < opts.maxit) && ~H.IsEmpty()
     end
 
     [i, j, w] = partition(node);
-    node_new1 = new_node(x, p, n, d, i, w, node, opts);
-    node_new2 = new_node(x, p, n, d, j, w, node, opts);
+    node_new1 = new_node(x, p, gp, n, d, i, w, node, opts);
+    node_new2 = new_node(x, p, gp, n, d, j, w, node, opts);
 
     % upper bound update
     U = min([U, node_new1.ub, node_new2.ub]);
@@ -149,9 +157,9 @@ while (step < opts.maxit) && ~H.IsEmpty()
     step = step + 1;
 end
 
-if H.IsEmpty()
-    out.lb_vec = [out.lb_vec U];
-end
+% if H.IsEmpty()
+%     out.lb_vec = [out.lb_vec U];
+% end
 t = L;
 out.iter = step;
 out.bnb = H;
@@ -166,13 +174,24 @@ w = (V(:, i) + V(:, j))/2;
 w = w / norm(w, 2);
 end
 
-function node_new = new_node(x, p, n, d, i, w, node, opts)
+function node_new = new_node(x, p, gp, n, d, i, w, node, opts)
 V = node.x;
 V(:, i) = w;
 lb = get_lower_bound(x, p, n, d, V, opts);
-center = mean(V, 2);
-center = center / norm(center, 2);
-ub = min(replace(p, x, w), replace(p, x, center));
+% center = mean(V, 2);
+% center = center / norm(center, 2);
+% ub = min(replace(p, x, w), replace(p, x, center));
+ub = replace(p, x, w);
+xp = w;
+if opts.maxit > 0
+    dist = pdist(V);
+    delta = max(dist);
+    ss = delta * 5e-1;
+    for i = 1 : opts.maxit
+        xp = proj_cone(xp - ss*replace(gp, x, xp), V);
+        ub = min(ub, replace(p, x, xp));
+    end
+end
 node_new = Node([], [], lb, ub, V);
 end
 
@@ -203,5 +222,18 @@ elseif opts.method == 1
     else
         lb = value(gamma);
     end
+end
+end
+
+
+function x = proj_cone(y, V)
+z = V \ y;
+z = max(0, z);
+nrmz = norm(z, 2);
+if nrmz < 1e-6
+    x = mean(V, 2);
+    x = x / norm(x, 2);
+else
+    x = z / nrmz;
 end
 end

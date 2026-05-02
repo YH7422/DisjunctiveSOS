@@ -1,11 +1,11 @@
 n = 3;
 x = sdpvar(n, 1);
 opts = struct();
-opts.init = 1;
+opts.init = 0;
 opts.method = 0;
 opts.verbose = 0;
-opts.eps = 1e-6;
-opts.maxit = 300;
+opts.eps = 1e-4;
+opts.max_node = 100;
 
 for m = 1:6
     d = 2*(2*m+1);

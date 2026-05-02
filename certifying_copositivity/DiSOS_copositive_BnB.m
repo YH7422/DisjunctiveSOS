@@ -6,7 +6,6 @@ function [t, out] = DiSOS_copositive_BnB(Q, opts)
 if ~isfield(opts, 'max_node'); opts.max_node = 100; end
 if ~isfield(opts, 'maxit'); opts.maxit = 5; end
 if ~isfield(opts, 'eps'); opts.eps = 1e-6; end
-if ~isfield(opts, 'c'); opts.c = []; end
 if ~isfield(opts, 'ub'); opts.ub = size(Q, 1); end
 if ~isfield(opts, 'solver'); opts.solver = 'MOSEK'; end
 if ~isfield(opts, 'dd'); opts.dd = 0; end
@@ -146,7 +145,9 @@ else
     alpha(i) = 1;
     ub = w*Q*w';
     G = x*Q*x';
-    ss = delta * 1e-1;
+%     alpha = ones(n, 1) / n;
+%     ub = min(ub, alpha'*G*alpha);
+    ss = delta * 5e-1;
     for i = 1 : opts.maxit
         alpha = proj_prob_vec(alpha - ss*G*alpha, 0, 1);
         ub = min(ub, alpha'*G*alpha);
@@ -162,7 +163,8 @@ n = size(Q, 1);
 J = ones(n);
 if opts.dd
     cvx_begin
-        variables t N(n, n)
+        variable t 
+        variable N(n, n) symmetric
         maximize(t)
         D = x*(Q - t*J)*x' - N;
         2 * diag(D) >= sum(abs(D), 2);
@@ -170,7 +172,8 @@ if opts.dd
     cvx_end
 else
     cvx_begin
-        variables t N(n, n)
+        variable t 
+        variable N(n, n) symmetric
         maximize(t)
         x*(Q - t*J)*x' - N == semidefinite(n);
         N >= 0;
