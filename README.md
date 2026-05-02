@@ -40,20 +40,10 @@ This repository implements the disjunctive sum of squares (DiSOS) method for cer
 
 The following versions were used in our experiments. Other versions might work but haven't been tested.
 
-### MATLAB Dependencies
-
 - MATLAB: 9.12 (R2022a)
 - CVX: 2.2
 - YALMIP: [R20230622](https://github.com/yalmip/YALMIP/releases/tag/R20230622)
 - Mosek: 10.2.1 (recommended SDP solver)
-
-### Optional Python Dependencies
-
-For graph generation (optional, as graph files are already included):
-
-- Python: 3.9.13
-- Numpy: 1.25.1
-- Networkx: 3.1
 
 ## Usage
 
