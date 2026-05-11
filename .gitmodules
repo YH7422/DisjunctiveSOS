@@ -1,0 +1,3 @@
+[submodule "ai-assisted"]
+	path = ai-assisted
+	url = https://github.com/stellatogrp/DisjunctiveSOS.jl.git
