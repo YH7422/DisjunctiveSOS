@@ -2,6 +2,14 @@
 
 This repository implements the disjunctive sum of squares (DiSOS) method for certifying nonnegativity of polynomials. Unlike traditional sum of squares methods that use a single algebraic identity, DiSOS method uses multiple algebraic identities with the same degree as the polynomial being verified. The implementation integrates branch-and-bound scheme and includes other applications like certifying copositivity of matrices and computing the clique number of graphs.
 
+The `ai-assisted/` folder is a git submodule of the Julia package [`DisjunctiveSOS.jl`](https://github.com/stellatogrp/DisjunctiveSOS.jl), which reproduces the AI-assisted rational SOS certificates of the paper's Appendix A and re-implements the spatial branch-and-bound framework with the symmetry-aware deduplication and global projected-gradient enhancements of Appendix B. To pull the submodule contents, clone recursively:
+
+```bash
+git clone --recurse-submodules https://github.com/YH7422/DisjunctiveSOS.git
+```
+
+or, if you already cloned without `--recurse-submodules`, run `git submodule update --init` inside the checkout.
+
 ## Repository Structure
 
 ```
